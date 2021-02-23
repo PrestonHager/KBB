@@ -1,5 +1,5 @@
 # py files
-__pycache/**
+__pycache__/**
 
 BOT_KEY.txt
 
