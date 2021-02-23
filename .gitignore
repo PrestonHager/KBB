@@ -1,0 +1,7 @@
+# py files
+__pycache/**
+
+BOT_KEY.txt
+
+# DS Stores
+.DS_Store
