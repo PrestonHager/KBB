@@ -2,7 +2,10 @@
 __pycache__
 __pycache__/*
 
+# bot specific files
 BOT_KEY.txt
+relationships.json
+save.json
 
 # DS Stores
 .DS_Store
