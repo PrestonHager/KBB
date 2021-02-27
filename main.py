@@ -12,12 +12,13 @@ import bot_utils as bot
 
 HELP_MESSAGE = """**;help** - shows this help message
 **;bf** - give me a boyfriend
+**;gf** - give me a girlfriend
 **;view [person]** - view a current relationship
 **;flirt** - flirt with your current relationship for hearts
 **;marry [hearts]** - ask your relationship to marry you
 **;talk** - talk to your relationship
 **;time** - how much time until next day"""
-COMMANDS = ["time", "bf", "view", "flirt", "marry", "talk"]
+COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk"]
 
 class KBB(discord.Client):
     command_start = ';'
@@ -25,6 +26,7 @@ class KBB(discord.Client):
     relationships = {}
     available_queue = []
     talking_lines = {}
+    tasks = {}
 
     async def on_ready(self):
         print("Ready and logged on as {}!".format(self.user))
@@ -52,8 +54,11 @@ class KBB(discord.Client):
             await self._command(message)
 
     async def on_reaction_add(self, reaction, user):
-        print(reaction)
-        print(user)
+        message_id = reaction.message.id
+        if message_id in self.tasks.keys():
+            succeeded = await self.tasks[message_id].on_reaction_add(reaction, user)
+            if succeeded:
+                del self.tasks[message_id]
 
     async def on_user_update(self, before, after):
         # TODO: add a conversion in database for when user changes
@@ -72,6 +77,8 @@ class KBB(discord.Client):
 
     async def _send_message(self, channel, message):
         await message.send(channel)
+        if message.task != None:
+            self.tasks[message.sent_message.id] = message.create_task()
 
     def _format_time(self, timedelta):
         hours, remainder = divmod(timedelta.total_seconds(), 3600)
@@ -83,7 +90,19 @@ class KBB(discord.Client):
             formatted_time = f"{int(hours)}h " + formatted_time
         return formatted_time
 
-    def _draw_boyfriend(self, user):
+    def draw_boyfriend(self, user):
+        pool = [d for d in self.saved['available'] if d['type'] == 'bf']
+        return self._draw_relationship_from_pool(user, pool)
+
+    def draw_girlfriend(self, user):
+        pool = [d for d in self.saved['available'] if d['type'] == 'gf']
+        return self._draw_relationship_from_pool(user, pool)
+
+    def draw_relationship(self, user):
+        pool = self.saved['available']
+        return self._draw_relationship_from_pool(user, pool)
+
+    def _draw_relationship_from_pool(self, user, pool):
         if str(user) not in self.relationships:
             self.relationships[str(user)] = {}
         else:
@@ -92,7 +111,7 @@ class KBB(discord.Client):
             self.relationships[str(user)][person['name']]['married'] = False
             self.available_queue.append(person)
         user_relationships = self.relationships[str(user)]
-        person = random.choice(self.saved['available'])
+        person = random.choice(pool)
         user_relationships['current'] = person
         user_relationships['current']['date_picked'] = datetime.datetime.now().isoformat()
         if person['name'] in user_relationships:

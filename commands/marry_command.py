@@ -7,6 +7,7 @@ import threading
 from math import e
 
 import bot_utils as bot
+from tasks import marry_task
 
 def marry_command(self, message):
     command = message.content[len(self.command_start):].strip().lower().split()
@@ -21,10 +22,15 @@ def marry_command(self, message):
             if len(command) > 1:
                 try:
                     tried_hearts = int(command[1])
-                    if tried_hearts > hearts:
+                    if tried_hearts < 25:
+                        return bot.Message("Marry", message.author, "The minimum number of ❤️ is 25.")
+                    elif tried_hearts > hearts:
                         return bot.Message("Marry", message.author, "You cannot use ❤️ that you don't have!")
                     else:
-                        percentage = (1 / (1 + e ** (-tried_hearts / 25 + 1)))
+                        chance = (1 / (1 + e ** (-tried_hearts / 25 + 1)))
+                        percentage = int(chance * 100)
+                        return bot.Message("Marry", message.author, f"Would you like to try to marry {person['name']} using your {tried_hearts} ❤️?\nThere is a {percentage}\% chance of it succeeding.", bot.Task(marry_task, bot.TaskCondition("✅"), [message.author], main=self, user_relationships=user_relationships, person=person, chance=chance, hearts=tried_hearts))
+                        # old code
                         chance = random.random()
                         print(f"Per: {percentage}\tChance: {chance}")
                         user_relationships[person['name']]['hearts'] -= tried_hearts

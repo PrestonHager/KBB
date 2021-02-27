@@ -1,5 +1,7 @@
 from .time_command import *
 from .bf_command import *
+from .gf_command import *
+from .xf_command import *
 from .view_command import *
 from .flirt_command import *
 from .marry_command import *
@@ -13,4 +15,4 @@ def command(cmd, self, message):
     else:
         raise ValueError(f"No command with the name {cmd} found.")
 
-__all__ = ["time_command", "bf_command", "view_command", "flirt_command", "marry_command", "talk_command", "command"]
+__all__ = ["time_command", "bf_command", "gf_command", "xf_command", "view_command", "flirt_command", "marry_command", "talk_command", "command"]
