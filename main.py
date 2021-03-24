@@ -27,29 +27,37 @@ class KBB(discord.Client):
     available_queue = []
     talking_lines = {}
     tasks = {}
+    development = False
+    data_access_lock = threading.Lock()
 
     async def on_ready(self):
-        print("Ready and logged on as {}!".format(self.user))
-        try:
-            with open("save.json", 'r') as f_in:
-                self.saved = json.load(f_in)
-        except:
-            self.saved = {"all": [], "available": []}
+        print("Ready and logged on as {}!\nLoading files....".format(self.user))
         try:
             with open("relationships.json", 'r') as f_in:
                 self.relationships = json.load(f_in)
         except:
             self.relationships = {}
+        with open("texts/dirty.txt", 'r') as f_in:
+            self.talking_lines['dirty'] = f_in.read().strip().split('\n')
+        try:
+            with open("save.json", 'r') as f_in:
+                self.saved = json.load(f_in)
+        except:
+            self.saved = {"all": [], "available": []}
         with open("all.csv", 'r') as f_in:
             available = [{"name": l.split(",")[0], "image": l.split(",")[1], "type": l.split(",")[2]} for l in f_in.read().strip().split("\n")[1:]]
         for person in available:
             if person not in self.saved["all"]:
                 self.saved["all"].append(person)
                 self.saved["available"].append(person)
-        with open("texts/dirty.txt", 'r') as f_in:
-            self.talking_lines['dirty'] = f_in.read().strip().split('\n')
+        print("All files loaded!")
 
     async def on_message(self, message):
+        in_dev_channel = message.channel.name in ["kbb-dev", "dev"]
+        if self.development == True and not in_dev_channel:
+            return False
+        elif self.development == False and in_dev_channel:
+            return False
         if message.content.startswith(self.command_start):
             await self._command(message)
 
@@ -63,7 +71,13 @@ class KBB(discord.Client):
     async def on_user_update(self, before, after):
         # TODO: add a conversion in database for when user changes
         # their username or discriminator.
-        pass
+        print(f"User '{str(before)}' changed their profile to '{str(after)}'")
+        self.data_access_lock.acquire()
+        self.relationships[str(after)] = self.relationships[str(before)]
+        del self.relationships[str(before)]
+        self.data_access_lock.release()
+        save_thread = threading.Thread(target=self._save)
+        save_thread.start()
 
     async def _command(self, message):
         command = message.content[len(self.command_start):].strip().lower().split()
@@ -103,6 +117,7 @@ class KBB(discord.Client):
         return self._draw_relationship_from_pool(user, pool)
 
     def _draw_relationship_from_pool(self, user, pool):
+        self.data_access_lock.acquire()
         if str(user) not in self.relationships:
             self.relationships[str(user)] = {}
         else:
@@ -122,14 +137,17 @@ class KBB(discord.Client):
         if len(self.available_queue) > 0:
             self.saved['available'].append(self.available_queue[-1])
             self.available_queue.pop()
+        self.data_access_lock.release()
         save_thread = threading.Thread(target=self._save)
         save_thread.start()
         return person
 
     def _add_hearts(self, user, amount=1):
+        self.data_access_lock.acquire()
         user_relationships = self.relationships[str(user)]
         person = user_relationships['current']
         user_relationships[person['name']]['hearts'] += amount
+        self.data_access_lock.release()
         save_thread = threading.Thread(target=self._save)
         save_thread.start()
 
@@ -139,7 +157,16 @@ class KBB(discord.Client):
         with open("relationships.json", 'w') as f_out:
             json.dump(self.relationships, f_out)
 
-client = KBB()
-with open("BOT_KEY.txt", 'r') as f_in:
-    bot_key = f_in.read().strip()
-client.run(bot_key)
+if __name__ == "__main__":
+    import sys
+    intents = discord.Intents.default()
+    intents.members = True
+    client = KBB(intents=intents)
+    if len(sys.argv) > 1:
+        options = [i.lower() for i in sys.argv[1:]]
+        if "-d" in options or "--dev" in options:
+            print("Starting in development mode.")
+            client.development = True
+    with open("BOT_KEY.txt", 'r') as f_in:
+        bot_key = f_in.read().strip()
+    client.run(bot_key)
