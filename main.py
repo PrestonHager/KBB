@@ -17,8 +17,9 @@ HELP_MESSAGE = """**;help** - shows this help message
 **;flirt** - flirt with your current relationship for hearts
 **;marry [hearts]** - ask your relationship to marry you
 **;talk** - talk to your relationship
-**;time** - how much time until next day"""
-COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk"]
+**;time** - how much time until next day
+**;pickup [line]** - try to gain hearts based on a pickup line you write"""
+COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup"]
 
 class KBB(discord.Client):
     command_start = ';'
