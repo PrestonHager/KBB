@@ -6,6 +6,8 @@ import json
 import random
 import datetime
 import threading
+from os import listdir
+from os.path import isfile, join, split
 
 import commands
 import bot_utils as bot
@@ -38,8 +40,10 @@ class KBB(discord.Client):
                 self.relationships = json.load(f_in)
         except:
             self.relationships = {}
-        with open("texts/dirty.txt", 'r') as f_in:
-            self.talking_lines['dirty'] = f_in.read().strip().split('\n')
+        texts = [f for f in listdir("texts") if isfile(join("texts", f)) and f.endswith(".txt")]
+        for text in texts:
+            with open(f"texts/{text}", 'r') as f_in:
+                self.talking_lines[text.split(".")[0]] = f_in.read().strip().split('\n')
         try:
             with open("save.json", 'r') as f_in:
                 self.saved = json.load(f_in)
