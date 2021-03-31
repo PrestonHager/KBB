@@ -77,12 +77,13 @@ class KBB(discord.Client):
         # TODO: add a conversion in database for when user changes
         # their username or discriminator.
         print(f"User '{str(before)}' changed their profile to '{str(after)}'")
-        self.data_access_lock.acquire()
-        self.relationships[str(after)] = self.relationships[str(before)]
-        del self.relationships[str(before)]
-        self.data_access_lock.release()
-        save_thread = threading.Thread(target=self._save)
-        save_thread.start()
+        if str(before) in self.relationships:
+            self.data_access_lock.acquire()
+            self.relationships[str(after)] = self.relationships[str(before)]
+            del self.relationships[str(before)]
+            self.data_access_lock.release()
+            save_thread = threading.Thread(target=self._save)
+            save_thread.start()
 
     async def _command(self, message):
         command = message.content[len(self.command_start):].strip().lower().split()
@@ -135,7 +136,7 @@ class KBB(discord.Client):
         user_relationships['current'] = person
         user_relationships['current']['date_picked'] = datetime.datetime.now().isoformat()
         if person['name'] in user_relationships:
-            user_relationships['picked'] += 1
+            user_relationships[person['name']]['picked'] += 1
         else:
             user_relationships[person['name']] = {"hearts": 0, "total_time": 0, "picked": 1, "married": False, "last_flirt": (datetime.datetime.now() - datetime.timedelta(minutes=2)).isoformat()}
         self.saved['available'].remove(person)
