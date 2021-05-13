@@ -6,6 +6,7 @@ import json
 import random
 import datetime
 import threading
+import traceback
 from os import listdir
 from os.path import isfile, join, split
 
@@ -64,20 +65,23 @@ class KBB(discord.Client):
         elif self.development == False and in_dev_channel:
             return False
         if message.content.startswith(self.command_start):
-            await self._command(message)
+            try:
+                await self._command(message)
+            except:
+                print(f"An exception has occured when {message.author.id} send the message `{message}`.")
+                traceback.print_exc()
 
     async def on_reaction_add(self, reaction, user):
         message_id = reaction.message.id
         if message_id in self.tasks.keys():
-            succeeded = await self.tasks[message_id].on_reaction_add(reaction, user)
+            succeeded = await self.tasks[message_id].on_reaction_add(reaction, user.id)
             if succeeded:
                 del self.tasks[message_id]
 
     async def on_user_update(self, before, after):
-        # TODO: add a conversion in database for when user changes
-        # their username or discriminator.
         print(f"User '{str(before)}' changed their profile to '{str(after)}'")
-        if str(before) in self.relationships:
+        return False # because now we use user ids!
+        if str(before) != str(after) and str(before) in self.relationships:
             self.data_access_lock.acquire()
             self.relationships[str(after)] = self.relationships[str(before)]
             del self.relationships[str(before)]
@@ -112,26 +116,26 @@ class KBB(discord.Client):
 
     def draw_boyfriend(self, user):
         pool = [d for d in self.saved['available'] if d['type'] == 'bf']
-        return self._draw_relationship_from_pool(user, pool)
+        return self._draw_relationship_from_pool(user.id, pool)
 
     def draw_girlfriend(self, user):
         pool = [d for d in self.saved['available'] if d['type'] == 'gf']
-        return self._draw_relationship_from_pool(user, pool)
+        return self._draw_relationship_from_pool(user.id, pool)
 
     def draw_relationship(self, user):
         pool = self.saved['available']
-        return self._draw_relationship_from_pool(user, pool)
+        return self._draw_relationship_from_pool(user.id, pool)
 
-    def _draw_relationship_from_pool(self, user, pool):
+    def _draw_relationship_from_pool(self, user_id, pool):
         self.data_access_lock.acquire()
-        if str(user) not in self.relationships:
-            self.relationships[str(user)] = {}
+        if str(user_id) not in self.relationships:
+            self.relationships[str(user_id)] = {}
         else:
-            person = self.relationships[str(user)]['current']
+            person = self.relationships[str(user_id)]['current']
             del person['date_picked']
-            self.relationships[str(user)][person['name']]['married'] = False
+            self.relationships[str(user_id)][person['name']]['married'] = False
             self.available_queue.append(person)
-        user_relationships = self.relationships[str(user)]
+        user_relationships = self.relationships[str(user_id)]
         person = random.choice(pool)
         user_relationships['current'] = person
         user_relationships['current']['date_picked'] = datetime.datetime.now().isoformat()
@@ -150,7 +154,7 @@ class KBB(discord.Client):
 
     def _add_hearts(self, user, amount=1):
         self.data_access_lock.acquire()
-        user_relationships = self.relationships[str(user)]
+        user_relationships = self.relationships[str(user.id)]
         person = user_relationships['current']
         user_relationships[person['name']]['hearts'] += amount
         self.data_access_lock.release()
