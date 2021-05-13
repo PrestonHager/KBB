@@ -13,7 +13,7 @@ def view_command(self, message):
         user = message.author.id
     if str(user) in self.relationships and 'current' in self.relationships[str(user)]:
         person = self.relationships[str(user)]['current']
-        s = 'You are' if user == message.author.id else message.mentions[0].mention.id + ' is'
+        s = 'You are' if user == message.author.id else str(message.mentions[0].id) + ' is'
         hearts = self.relationships[str(user)][person['name']]['hearts']
         married = "Yes" if self.relationships[str(user)][person['name']]['married'] else "No"
         return bot.Message("View Relationship", message.author, f"{s} with **{person['name']}** right now.", fields=bot.MessageFields(("❤️", f"+**{hearts}**"), ("💍", f"{married}")), image_path=f"images/{person['image']}")
