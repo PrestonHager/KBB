@@ -6,7 +6,7 @@ import datetime
 import bot_utils as bot
 
 def time_command(self, message):
-    if message.author.id not in self.relationships:
+    if str(message.author.id) not in self.relationships:
         return bot.Message("Time Left", message.author, f"Type `;bf`, `;gf`, or `;xf` to get a relationship!")
     person = self.relationships[str(message.author.id)]['current']
     last_flirt = datetime.datetime.fromisoformat(self.relationships[str(message.author.id)][person['name']]['last_flirt'])
