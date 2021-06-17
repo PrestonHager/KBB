@@ -40,12 +40,19 @@ class KBB(discord.Client):
                 self.relationships = json.load(f_in)
         except:
             self.relationships = {}
+        try:
+            with open("inventories.json", 'r') as f_in:
+                self.inventories = json.load(f_in)
+        except:
+            self.inventories = {}
         with open("all.csv", 'r') as f_in:
             available = [{"name": l.split(",")[0], "image": l.split(",")[1], "type": l.split(",")[2]} for l in f_in.read().strip().split("\n")[1:]]
         for person in available:
             if person not in self.saved["all"]:
                 self.saved["all"].append(person)
                 self.saved["available"].append(person)
+        save_thread = threading.Thread(target=self._save, args=("saved",))
+        save_thread.start()
         with open("texts/dirty.txt", 'r') as f_in:
             self.talking_lines['dirty'] = f_in.read().strip().split('\n')
 
@@ -122,7 +129,7 @@ class KBB(discord.Client):
         if len(self.available_queue) > 0:
             self.saved['available'].append(self.available_queue[-1])
             self.available_queue.pop()
-        save_thread = threading.Thread(target=self._save)
+        save_thread = threading.Thread(target=self._save, args=("rs",))
         save_thread.start()
         return person
 
@@ -130,14 +137,28 @@ class KBB(discord.Client):
         user_relationships = self.relationships[str(user)]
         person = user_relationships['current']
         user_relationships[person['name']]['hearts'] += amount
-        save_thread = threading.Thread(target=self._save)
+        save_thread = threading.Thread(target=self._save, args=("relationships",))
         save_thread.start()
 
-    def _save(self):
-        with open("save.json", 'w') as f_out:
-            json.dump(self.saved, f_out)
-        with open("relationships.json", 'w') as f_out:
-            json.dump(self.relationships, f_out)
+    def _add_item(self, user, item):
+        user_inventory = self.inventories[str(user)]
+        user_inventory[item["uuid"]] = item
+        save_thread = threading.Thread(target=self._save, args=("inventories",))
+        save_thread.start()
+
+    def _update_item(self, user, item):
+        pass
+
+    def _save(self, files="all"):
+        if files in ["saved", "all", "rs"]:
+            with open("save.json", 'w') as f_out:
+                json.dump(self.saved, f_out)
+        if files in ["relationships", "all", "rs"]:
+            with open("relationships.json", 'w') as f_out:
+                json.dump(self.relationships, f_out)
+        if files == "inventories" or files == "all":
+            with open("inventories.json", 'w') as f_out:
+                json.dump(self.inventories, f_out)
 
 client = KBB()
 with open("BOT_KEY.txt", 'r') as f_in:

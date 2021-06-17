@@ -6,6 +6,7 @@ __pycache__/*
 BOT_KEY.txt
 relationships.json
 save.json
+inventories.json
 
 # DS Stores
 .DS_Store
