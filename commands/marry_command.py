@@ -11,7 +11,7 @@ from tasks import marry_task
 
 def marry_command(self, message):
     command = message.content[len(self.command_start):].strip().lower().split()
-    if str(message.author) in self.relationships and 'current' in self.relationships[str(message.author)]:
+    if str(message.author.id) in self.relationships and 'current' in self.relationships[str(message.author.id)]:
         user_relationships = self.relationships[str(message.author)]
         person = user_relationships['current']
         hearts = user_relationships[person['name']]['hearts']
@@ -29,18 +29,7 @@ def marry_command(self, message):
                     else:
                         chance = (1 / (1 + e ** (-tried_hearts / 25 + 1)))
                         percentage = int(chance * 100)
-                        return bot.Message("Marry", message.author, f"Would you like to try to marry {person['name']} using your {tried_hearts} ❤️?\nThere is a {percentage}\% chance of it succeeding.", bot.Task(marry_task, bot.TaskCondition("✅"), [message.author], main=self, user_relationships=user_relationships, person=person, chance=chance, hearts=tried_hearts))
-                        # old code
-                        chance = random.random()
-                        print(f"Per: {percentage}\tChance: {chance}")
-                        user_relationships[person['name']]['hearts'] -= tried_hearts
-                        if chance <= percentage:
-                            user_relationships[person['name']]['married'] = True
-                            save_thread = threading.Thread(target=self._save)
-                            save_thread.start()
-                            return bot.Message("Marry", message.author, f"You are now married to {person['name']}!")
-                        else:
-                            return bot.Message("Marry", message.author, f"{person['name']} rejected you, better luck next time.")
+                        return bot.Message("Marry", message.author, f"Would you like to try to marry {person['name']} using your {tried_hearts} ❤️?\nThere is a {percentage}\% chance of it succeeding.", bot.Task([bot.TaskCondition("✅", marry_task, main=self, user_relationships=user_relationships, person=person, chance=chance, hearts=tried_hearts)], [message.author.id], expires=60.0))
                     return
                 except ValueError:
                     pass
