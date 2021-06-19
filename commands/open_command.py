@@ -18,7 +18,7 @@ def open_command(self, message):
                 if item['amount'] < 1:
                     del user_inventory[i]
                 self.database.put_user(int(message.author.id), inventory=user_inventory)
-                item_name = self.random_item(common=1)
+                item_name = self.random_item(common=20, rare=4, ultra=1)
                 item = self._add_item(message.author, item_name)
                 article = "an" if item['name'][0] in "aeiouy" else "a"
                 return bot.Message("Open Box", message.author, f"You got {article} {item['name']} out of the box!")

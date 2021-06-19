@@ -15,11 +15,23 @@
     "coin": {
       "name": "Coin",
       "description": "It looks worn from use"
+    },
+    "leather": {
+      "name": "Leather",
+      "description": "Once an animal skin, it's dried out"
+    },
+    "feather": {
+      "name": "Feather",
+      "description": "Shedded from a bird, it's long and elegant"
+    },
+    "ring": {
+      "name": "Diamond Ring",
+      "description": "Made with diamonds, it sparkles in the light"
     }
   },
   "by_rarity": {
-    "common": ["card", "coin"],
-    "rare": [],
-    "ultra": ["diamond"]
+    "common": ["card", "coin", "feather"],
+    "rare": ["leather", "diamond"],
+    "ultra": ["ring"]
   }
 }

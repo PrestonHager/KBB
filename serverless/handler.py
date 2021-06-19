@@ -16,7 +16,7 @@ def test(event, context):
             "error": "Body was not JSON content."
         }
         return create_response(response, 400)
-    if "user" not in data or "type" not in data:
+    if "user" not in data or "type" not in data or "isWeekend" not in data:
         response = {
             "error": "JSON content did not contain key values."
         }
@@ -27,10 +27,11 @@ def test(event, context):
         }
         return create_response(response, 200)
     # get the user id, find them in the table, and add a box.
+    amount = 2 if data["isWeekend"] else 1
     user_id = data["user"]
     query = users_table.get_item(Key={'user_id': user_id})
     item_uuid = uuid4().hex
-    box_item = {"uuid": item_uuid, "name": "Mystery Box", "description": "Open to reveal whatever might be inside!", "amount": 1, "item": "mystery_box"}
+    box_item = {"uuid": item_uuid, "name": "Mystery Box", "description": "Open to reveal whatever might be inside!", "amount": amount, "item": "mystery_box"}
     response = {
         "message": "Success!"
     }
@@ -46,7 +47,7 @@ def test(event, context):
     for i in user_data["inventory"]:
         item = user_data["inventory"][i]
         if item['item'] == "mystery_box":
-            item['amount'] = int(item['amount']) + 1
+            item['amount'] = int(item['amount']) + amount
             found_item = True
             break
     if not found_item:

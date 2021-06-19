@@ -186,9 +186,11 @@ class KBB(discord.Client):
                 item = user_inventory[i]
                 if item['item'] == item_name:
                     item['amount'] += amount
+                    if item['amount'] <= 0:
+                        del item
                     item_found = True
                     break
-        if not item_found:
+        if not item_found and amount > 0:
             item = {
                 "uuid": uuid4().hex,
                 "name": self._localize(item_name),
@@ -200,9 +202,6 @@ class KBB(discord.Client):
         self.database.put_user(int(user.id), inventory=user_inventory)
         self.data_access_locks["inv"].release()
         return item
-
-    def _update_item(self, user, item):
-        pass
 
     def _localize(self, item, loc_type="name"):
         if loc_type == "name":
