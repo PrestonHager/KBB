@@ -24,9 +24,9 @@ HELP_MESSAGE = """**;help** - shows this help message
 **;talk** - talk to your relationship
 **;time** - how much time until next day
 **;pickup [line]** - try to gain hearts based on a pickup line you write
-**;items - view the items in your inventory
-**;open - open a mystery box if you have one
-**;vote - vote for KBB and earn rewards!"""
+**;items** - view the items in your inventory
+**;open** - open a mystery box if you have one
+**;vote** - vote for KBB and earn rewards!"""
 COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open"]
 
 class KBB(discord.Client):
