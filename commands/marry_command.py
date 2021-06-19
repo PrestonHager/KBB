@@ -12,7 +12,7 @@ from tasks import marry_task
 def marry_command(self, message):
     command = message.content[len(self.command_start):].strip().lower().split()
     if str(message.author.id) in self.relationships and 'current' in self.relationships[str(message.author.id)]:
-        user_relationships = self.relationships[str(message.author)]
+        user_relationships = self.relationships[str(message.author.id)]
         person = user_relationships['current']
         hearts = user_relationships[person['name']]['hearts']
         married = user_relationships[person['name']]['married']
