@@ -20,7 +20,7 @@ def view_command(self, message):
         married = "Yes" if user_relationships[person['name']]['married'] else "No"
         return bot.Message("View Relationship", message.author, f"{s} with **{person['name']}** right now.", fields=bot.MessageFields(("❤️", f"+**{hearts}**"), ("💍", f"{married}")), image_path=f"images/{person['image']}")
     else:
-        s = 'You don\'t' if user == message.author.id else message.mentions[0].mention + ' doesn\'t'
+        s = 'You don\'t' if user_id == message.author.id else message.mentions[0].mention + ' doesn\'t'
         return bot.Message("View Relationship", message.author, f"{s} have a relationship yet.")
 
 __all__ = ["view_command"]

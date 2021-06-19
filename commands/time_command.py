@@ -7,7 +7,7 @@ import bot_utils as bot
 
 def time_command(self, message):
     user = self.database.get_user(int(message.author.id))
-    if user == None:
+    if user == None or user['relationships']['current'] == {}:
         return bot.Message("Time Left", message.author, f"Type `;bf`, `;gf`, or `;xf` to get a relationship!")
     user_relationships = user['relationships']
     person = user_relationships['current']
