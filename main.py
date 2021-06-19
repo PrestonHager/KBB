@@ -28,11 +28,13 @@ class KBB(discord.Client):
     command_start = ';'
     saved = {"all": [], "available": []}
     relationships = {}
+    inventories = {}
     available_queue = []
     talking_lines = {}
     tasks = {}
     development = False
     data_access_lock = threading.Lock()
+    data_access_locks = {"save": threading.Lock(), "rel": threading.Lock(), "inv": threading.Lock()}
 
     async def on_ready(self):
         print("Ready and logged on as {}!\nLoading files....".format(self.user))
@@ -41,21 +43,28 @@ class KBB(discord.Client):
                 self.relationships = json.load(f_in)
         except:
             self.relationships = {}
-        texts = [f for f in listdir("texts") if isfile(join("texts", f)) and f.endswith(".txt")]
-        for text in texts:
-            with open(f"texts/{text}", 'r') as f_in:
-                self.talking_lines[text.split(".")[0]] = f_in.read().strip().split('\n')
         try:
             with open("save.json", 'r') as f_in:
                 self.saved = json.load(f_in)
         except:
             self.saved = {"all": [], "available": []}
+        try:
+            with open("inventories.json", 'r') as f_in:
+                self.inventories = json.load(f_in)
+        except:
+            self.inventories = {}
+        texts = [f for f in listdir("texts") if isfile(join("texts", f)) and f.endswith(".txt")]
+        for text in texts:
+            with open(f"texts/{text}", 'r') as f_in:
+                self.talking_lines[text.split(".")[0]] = f_in.read().strip().split('\n')
         with open("all.csv", 'r') as f_in:
             available = [{"name": l.split(",")[0], "image": l.split(",")[1], "type": l.split(",")[2]} for l in f_in.read().strip().split("\n")[1:]]
         for person in available:
             if person not in self.saved["all"]:
                 self.saved["all"].append(person)
                 self.saved["available"].append(person)
+        save_thread = threading.Thread(target=self._save, args=("saved",))
+        save_thread.start()
         print("All files loaded!")
 
     async def on_message(self, message):
@@ -82,10 +91,10 @@ class KBB(discord.Client):
         print(f"User '{str(before)}' changed their profile to '{str(after)}'")
         return False # because now we use user ids!
         if str(before) != str(after) and str(before) in self.relationships:
-            self.data_access_lock.acquire()
+            self.data_access_locks["rel"].acquire()
             self.relationships[str(after)] = self.relationships[str(before)]
             del self.relationships[str(before)]
-            self.data_access_lock.release()
+            self.data_access_locks["rel"].release()
             save_thread = threading.Thread(target=self._save)
             save_thread.start()
 
@@ -127,7 +136,8 @@ class KBB(discord.Client):
         return self._draw_relationship_from_pool(user.id, pool)
 
     def _draw_relationship_from_pool(self, user_id, pool):
-        self.data_access_lock.acquire()
+        self.data_access_locks["rel"].acquire()
+        self.data_access_locks["save"].acquire()
         if str(user_id) not in self.relationships:
             self.relationships[str(user_id)] = {}
         else:
@@ -147,25 +157,42 @@ class KBB(discord.Client):
         if len(self.available_queue) > 0:
             self.saved['available'].append(self.available_queue[-1])
             self.available_queue.pop()
-        self.data_access_lock.release()
-        save_thread = threading.Thread(target=self._save)
+        self.data_access_locks["rel"].release()
+        self.data_access_locks["save"].release()
+        save_thread = threading.Thread(target=self._save, args=("rs",))
         save_thread.start()
         return person
 
     def _add_hearts(self, user, amount=1):
-        self.data_access_lock.acquire()
+        self.data_access_locks["rel"].acquire()
         user_relationships = self.relationships[str(user.id)]
         person = user_relationships['current']
         user_relationships[person['name']]['hearts'] += amount
-        self.data_access_lock.release()
-        save_thread = threading.Thread(target=self._save)
+        self.data_access_locks["rel"].release()
+        save_thread = threading.Thread(target=self._save, args=("relationships",))
         save_thread.start()
 
-    def _save(self):
-        with open("save.json", 'w') as f_out:
-            json.dump(self.saved, f_out)
-        with open("relationships.json", 'w') as f_out:
-            json.dump(self.relationships, f_out)
+    def _add_item(self, user, item):
+        self.data_access_locks["inv"].acquire()
+        user_inventory = self.inventories[str(user)]
+        user_inventory[item["uuid"]] = item
+        self.data_access_locks["inv"].release()
+        save_thread = threading.Thread(target=self._save, args=("inventories",))
+        save_thread.start()
+
+    def _update_item(self, user, item):
+        pass
+
+    def _save(self, files="all"):
+        if files in ["saved", "all", "rs"]:
+            with open("save.json", 'w') as f_out:
+                json.dump(self.saved, f_out)
+        if files in ["relationships", "all", "rs"]:
+            with open("relationships.json", 'w') as f_out:
+                json.dump(self.relationships, f_out)
+        if files == "inventories" or files == "all":
+            with open("inventories.json", 'w') as f_out:
+                json.dump(self.inventories, f_out)
 
 if __name__ == "__main__":
     import sys
