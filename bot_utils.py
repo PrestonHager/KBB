@@ -105,7 +105,7 @@ class Task:
         for condition in self.conditions:
             await self.message.sent_message.clear_reaction(condition.emoji)
         if self.message.task_expire_thread != None:
-            self.task_expire_thread.cancel()
+            self.message.task_expire_thread.cancel()
 
     async def on_reaction_add(self, reaction, user):
         if ((self.whitelist and user in self.users_list) or (not self.whitelist and user not in self.users_list)) and not self.complete and user not in self.users_reacted:
