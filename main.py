@@ -12,6 +12,7 @@ from os.path import isfile, join, split
 
 import commands
 import bot_utils as bot
+from database_manager import *
 
 HELP_MESSAGE = """**;help** - shows this help message
 **;bf** - give me a boyfriend
@@ -27,32 +28,20 @@ COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup"
 class KBB(discord.Client):
     command_start = ';'
     saved = {"all": [], "available": []}
-    relationships = {}
-    inventories = {}
     available_queue = []
     talking_lines = {}
     tasks = {}
     development = False
-    data_access_lock = threading.Lock()
     data_access_locks = {"save": threading.Lock(), "rel": threading.Lock(), "inv": threading.Lock()}
+    database = DatabaseManager("kbb-users")
 
     async def on_ready(self):
         print("Ready and logged on as {}!\nLoading files....".format(self.user))
-        try:
-            with open("relationships.json", 'r') as f_in:
-                self.relationships = json.load(f_in)
-        except:
-            self.relationships = {}
         try:
             with open("save.json", 'r') as f_in:
                 self.saved = json.load(f_in)
         except:
             self.saved = {"all": [], "available": []}
-        try:
-            with open("inventories.json", 'r') as f_in:
-                self.inventories = json.load(f_in)
-        except:
-            self.inventories = {}
         texts = [f for f in listdir("texts") if isfile(join("texts", f)) and f.endswith(".txt")]
         for text in texts:
             with open(f"texts/{text}", 'r') as f_in:
@@ -86,17 +75,6 @@ class KBB(discord.Client):
             succeeded = await self.tasks[message_id].on_reaction_add(reaction, user.id)
             if succeeded:
                 del self.tasks[message_id]
-
-    async def on_user_update(self, before, after):
-        print(f"User '{str(before)}' changed their profile to '{str(after)}'")
-        return False # because now we use user ids!
-        if str(before) != str(after) and str(before) in self.relationships:
-            self.data_access_locks["rel"].acquire()
-            self.relationships[str(after)] = self.relationships[str(before)]
-            del self.relationships[str(before)]
-            self.data_access_locks["rel"].release()
-            save_thread = threading.Thread(target=self._save)
-            save_thread.start()
 
     async def _command(self, message):
         command = message.content[len(self.command_start):].strip().lower().split()
@@ -138,14 +116,17 @@ class KBB(discord.Client):
     def _draw_relationship_from_pool(self, user_id, pool):
         self.data_access_locks["rel"].acquire()
         self.data_access_locks["save"].acquire()
-        if str(user_id) not in self.relationships:
-            self.relationships[str(user_id)] = {}
+        user = self.database.get_user(int(user_id))
+        if user == None:
+            user = self.database.new_user(int(user_id))
+            user_relationships = user["relationships"]
         else:
-            person = self.relationships[str(user_id)]['current']
+            user_relationships = user["relationships"]
+            person = user_relationships['current']
             del person['date_picked']
-            self.relationships[str(user_id)][person['name']]['married'] = False
-            self.available_queue.append(person)
-        user_relationships = self.relationships[str(user_id)]
+            if person != {}:
+                user_relationships[person['name']]['married'] = False
+                self.available_queue.append(person)
         person = random.choice(pool)
         user_relationships['current'] = person
         user_relationships['current']['date_picked'] = datetime.datetime.now().isoformat()
@@ -157,42 +138,34 @@ class KBB(discord.Client):
         if len(self.available_queue) > 0:
             self.saved['available'].append(self.available_queue[-1])
             self.available_queue.pop()
+        self.database.put_user(int(user_id), user=user)
         self.data_access_locks["rel"].release()
         self.data_access_locks["save"].release()
-        save_thread = threading.Thread(target=self._save, args=("rs",))
+        save_thread = threading.Thread(target=self._save, args=("saved",))
         save_thread.start()
         return person
 
     def _add_hearts(self, user, amount=1):
         self.data_access_locks["rel"].acquire()
-        user_relationships = self.relationships[str(user.id)]
+        user_relationships = self.database.get_user(int(user.id))["relationships"]
         person = user_relationships['current']
         user_relationships[person['name']]['hearts'] += amount
+        self.database.put_user(int(user.id), relationships=user_relationships)
         self.data_access_locks["rel"].release()
-        save_thread = threading.Thread(target=self._save, args=("relationships",))
-        save_thread.start()
 
     def _add_item(self, user, item):
         self.data_access_locks["inv"].acquire()
-        user_inventory = self.inventories[str(user)]
+        user_inventory = self.database.get_user([int(user.id)])["inventory"]
         user_inventory[item["uuid"]] = item
+        self.database.put_user(int(user.id), inventory=user_inventory)
         self.data_access_locks["inv"].release()
-        save_thread = threading.Thread(target=self._save, args=("inventories",))
-        save_thread.start()
 
     def _update_item(self, user, item):
         pass
 
-    def _save(self, files="all"):
-        if files in ["saved", "all", "rs"]:
-            with open("save.json", 'w') as f_out:
-                json.dump(self.saved, f_out)
-        if files in ["relationships", "all", "rs"]:
-            with open("relationships.json", 'w') as f_out:
-                json.dump(self.relationships, f_out)
-        if files == "inventories" or files == "all":
-            with open("inventories.json", 'w') as f_out:
-                json.dump(self.inventories, f_out)
+    def _save(self, files="saved"):
+        with open("save.json", 'w') as f_out:
+            json.dump(self.saved, f_out)
 
 if __name__ == "__main__":
     import sys

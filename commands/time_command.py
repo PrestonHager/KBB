@@ -6,17 +6,19 @@ import datetime
 import bot_utils as bot
 
 def time_command(self, message):
-    if str(message.author.id) not in self.relationships:
+    user = self.database.get_user(int(message.author.id))
+    if user == None:
         return bot.Message("Time Left", message.author, f"Type `;bf`, `;gf`, or `;xf` to get a relationship!")
-    person = self.relationships[str(message.author.id)]['current']
-    last_flirt = datetime.datetime.fromisoformat(self.relationships[str(message.author.id)][person['name']]['last_flirt'])
+    user_relationships = user['relationships']
+    person = user_relationships['current']
+    last_flirt = datetime.datetime.fromisoformat(user_relationships[person['name']]['last_flirt'])
     till_next_flirt = datetime.timedelta(seconds=60 * 2 - (datetime.datetime.now() - last_flirt).total_seconds())
     if till_next_flirt < datetime.timedelta(seconds=0):
         flirt_string = "You can flirt with your relationship at any time.\n"
     else:
         formatted_time = self._format_time(till_next_flirt)
         flirt_string = f"You can flirt with your relationship in `{formatted_time}`\n"
-    date_picked = datetime.datetime.fromisoformat(self.relationships[str(message.author.id)]['current']['date_picked'])
+    date_picked = datetime.datetime.fromisoformat(user_relationships['current']['date_picked'])
     time_remaining = datetime.timedelta(seconds=24 * 60 * 60 - (datetime.datetime.now() - date_picked).total_seconds())
     if time_remaining < datetime.timedelta(seconds=0):
         return bot.Message("Time Left", message.author, f"{flirt_string}You can claim a new relationship at any time.")

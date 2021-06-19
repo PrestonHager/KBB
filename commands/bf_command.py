@@ -6,10 +6,11 @@ import datetime
 import bot_utils as bot
 
 def bf_command(self, message):
+    user = self.database.get_user(int(message.author.id))
     if len(self.saved['available']) == 0:
         return bot.Message("Boyfriend", message.author, "I'm out of boyfriends!")
-    elif str(message.author.id) in self.relationships:
-        date_picked = datetime.datetime.fromisoformat(self.relationships[str(message.author.id)]['current']['date_picked'])
+    elif user != None:
+        date_picked = datetime.datetime.fromisoformat(user['relationships']['current']['date_picked'])
         if (datetime.datetime.now() - date_picked).total_seconds() < 24 * 60 * 60:
             return bot.Message("Boyfriend", message.author, "You already have a relationship, you can't have another right now.")
     boyfriend = self.draw_boyfriend(message.author)
