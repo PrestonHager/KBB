@@ -9,6 +9,7 @@ import threading
 import traceback
 from os import listdir
 from os.path import isfile, join, split
+from uuid import uuid4
 
 import commands
 import bot_utils as bot
@@ -22,8 +23,11 @@ HELP_MESSAGE = """**;help** - shows this help message
 **;marry [hearts]** - ask your relationship to marry you
 **;talk** - talk to your relationship
 **;time** - how much time until next day
-**;pickup [line]** - try to gain hearts based on a pickup line you write"""
-COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup"]
+**;pickup [line]** - try to gain hearts based on a pickup line you write
+**;items - view the items in your inventory
+**;open - open a mystery box if you have one
+**;vote - vote for KBB and earn rewards!"""
+COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open"]
 
 class KBB(discord.Client):
     command_start = ';'
@@ -37,6 +41,10 @@ class KBB(discord.Client):
 
     async def on_ready(self):
         print("Ready and logged on as {}!\nLoading files....".format(self.user))
+        with open("items.json", 'r') as f_in:
+            items = json.load(f_in)
+            self.ALL_ITEMS = items['all']
+            self.ALL_RARITY_ITEMS = items['by_rarity']
         try:
             with open("save.json", 'r') as f_in:
                 self.saved = json.load(f_in)
@@ -153,15 +161,54 @@ class KBB(discord.Client):
         self.database.put_user(int(user.id), relationships=user_relationships)
         self.data_access_locks["rel"].release()
 
-    def _add_item(self, user, item):
+    def random_item(self, **kwargs):
+        def weighted_random(weights):
+            total = sum(i for i in weights.values())
+            r = random.randint(1, total)
+            for value in weights:
+                r -= weights[value]
+                if r <= 0: return value
+        weights = {
+            "common": 0,
+            "rare": 0,
+            "ultra": 0
+        }
+        weights.update(kwargs)
+        item_rarity = weighted_random(weights)
+        return random.choice(self.ALL_RARITY_ITEMS[item_rarity])
+
+    def _add_item(self, user, item_name, stack=True, amount=1):
         self.data_access_locks["inv"].acquire()
-        user_inventory = self.database.get_user([int(user.id)])["inventory"]
-        user_inventory[item["uuid"]] = item
+        user_inventory = self.database.get_user(int(user.id))["inventory"]
+        item_found = False
+        if stack:
+            for i in user_inventory:
+                item = user_inventory[i]
+                if item['item'] == item_name:
+                    item['amount'] += amount
+                    item_found = True
+                    break
+        if not item_found:
+            item = {
+                "uuid": uuid4().hex,
+                "name": self._localize(item_name),
+                "description": self._localize(item_name, "description"),
+                "amount": amount,
+                "item": item_name
+            }
+            user_inventory[item["uuid"]] = item
         self.database.put_user(int(user.id), inventory=user_inventory)
         self.data_access_locks["inv"].release()
+        return item
 
     def _update_item(self, user, item):
         pass
+
+    def _localize(self, item, loc_type="name"):
+        if loc_type == "name":
+            return self.ALL_ITEMS[item]['name']
+        elif loc_type == "description":
+            return self.ALL_ITEMS[item]['description']
 
     def _save(self, files="saved"):
         with open("save.json", 'w') as f_out:

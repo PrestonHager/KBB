@@ -1,0 +1,25 @@
+{
+  "all": {
+    "mystery_box": {
+      "name": "Mystery Box",
+      "description": "Open to reveal whatever might be inside!"
+    },
+    "diamond": {
+      "name": "Diamond",
+      "description": "A clean cut diamond, it's sparkly."
+    },
+    "card": {
+      "name": "Card",
+      "description": "It probably came from a deck of cards"
+    },
+    "coin": {
+      "name": "Coin",
+      "description": "It looks worn from use"
+    }
+  },
+  "by_rarity": {
+    "common": ["card", "coin"],
+    "rare": [],
+    "ultra": ["diamond"]
+  }
+}

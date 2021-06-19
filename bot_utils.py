@@ -84,7 +84,10 @@ class Message:
 
 class MessageFields:
     def __init__(self, *args):
-        self.lines = args
+        self.lines = list(args)
+
+    def add_field(self, field):
+        self.lines.append(field)
 
     def create_fields(self, embed):
         for line in self.lines:

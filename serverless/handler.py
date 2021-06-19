@@ -30,7 +30,7 @@ def test(event, context):
     user_id = data["user"]
     query = users_table.get_item(Key={'user_id': user_id})
     item_uuid = uuid4().hex
-    item = {"uuid": item_uuid, "name": "Mystery Box", "description": "Open to reveal whatever might be inside!", "amount": 1, "item": "mystery_box"}
+    box_item = {"uuid": item_uuid, "name": "Mystery Box", "description": "Open to reveal whatever might be inside!", "amount": 1, "item": "mystery_box"}
     response = {
         "message": "Success!"
     }
@@ -38,15 +38,23 @@ def test(event, context):
         users_table.put_item(Item={
             "user_id": user_id,
             "relationships": {'current': {}},
-            "inventory": {item_uuid: item}
+            "inventory": {item_uuid: box_item}
         })
         return create_response(response, 200)
+    found_item = False
     user_data = query["Item"]
-    user_data["inventory"][item_uuid] = item
+    for i in user_data["inventory"]:
+        item = user_data["inventory"][i]
+        if item['item'] == "mystery_box":
+            item['amount'] = int(item['amount']) + 1
+            found_item = True
+            break
+    if not found_item:
+        user_data["inventory"][item_uuid] = box_item
     users_table.update_item(Key={'user_id': user_id},
-        UpdateExpression="set inventory = :v",
+        UpdateExpression="set inventory = :i",
         ExpressionAttributeValues={
-            ':v': user_data["inventory"]
+            ':i': user_data["inventory"]
         })
     return create_response(response, 200)
 
