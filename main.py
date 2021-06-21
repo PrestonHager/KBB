@@ -125,7 +125,7 @@ class KBB(discord.Client):
         self.data_access_locks["rel"].acquire()
         self.data_access_locks["save"].acquire()
         user = self.database.get_user(int(user_id))
-        if user == None:
+        if user == None or user['relationships']['current'] == {}:
             user = self.database.new_user(int(user_id))
             user_relationships = user["relationships"]
         else:
