@@ -15,12 +15,12 @@ def view_command(self, message):
     if user != None and user['relationships']['current'] != {}:
         user_relationships = user['relationships']
         person = user_relationships['current']
-        s = 'You are' if user_id == message.author.id else str(message.mentions[0].id) + ' is'
+        s = 'You are' if user_id == message.author.id else message.mentions[0].mention + ' is'
         hearts = user_relationships[person['name']]['hearts']
         married = "Yes" if user_relationships[person['name']]['married'] else "No"
         return bot.Message("View Relationship", message.author, f"{s} with **{person['name']}** right now.", fields=bot.MessageFields(("❤️", f"+**{hearts}**"), ("💍", f"{married}")), image_path=f"images/{person['image']}")
     else:
-        s = 'You don\'t' if user == message.author else message.mentions[0].mention + ' doesn\'t'
+        s = 'You don\'t' if user_id == message.author.id else message.mentions[0].mention + ' doesn\'t'
         return bot.Message("View Relationship", message.author, f"{s} have a relationship yet.")
 
 __all__ = ["view_command"]

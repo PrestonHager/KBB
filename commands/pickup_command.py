@@ -15,7 +15,7 @@ def pickup_command(self, message):
             bot.TaskCondition("✅", pickup_task, self, message.author, amount=2),
             bot.TaskCondition("❌", pickup_task, self, message.author, amount=0)
         ]
-        message = bot.Message("Pickup", message.author, f"Rate {name}'s pickup line: **\"{pickup_line}\"**\n❤️ if you love it, ✅ if it's ok, or ❌ if it's terrible.", task=bot.Task(conditions, [message.author.id], whitelist=False, expires=60.0))
+        message = bot.Message("Pickup", message.author, f"Rate {name}'s pickup line: **\"{pickup_line}\"**\n❤️ if you love it, ✅ if it's ok, or ❌ if it's terrible.\nEarned ❤️: 0", task=bot.Task(conditions, [message.author.id], whitelist=False, expires=60.0))
         return message
     else:
         return bot.Message("Pickup", message.author, "You must be in a relationship to do this.")
