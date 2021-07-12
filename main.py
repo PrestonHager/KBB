@@ -27,7 +27,7 @@ HELP_MESSAGE = """**;help** - shows this help message
 **;items** - view the items in your inventory
 **;open** - open a mystery box if you have one
 **;vote** - vote for KBB and earn rewards!"""
-COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open"]
+COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open", "prefix"]
 
 class KBB(discord.Client):
     command_start = ';'

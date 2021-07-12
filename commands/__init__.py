@@ -10,6 +10,7 @@ from .pickup_command import *
 from .vote_command import *
 from .items_command import *
 from .open_command import *
+from .prefix_command import *
 
 def command(cmd, self, message):
     cmd_string = cmd + "_command"
@@ -19,4 +20,4 @@ def command(cmd, self, message):
     else:
         raise ValueError(f"No command with the name {cmd} found.")
 
-__all__ = ["time_command", "bf_command", "gf_command", "xf_command", "view_command", "flirt_command", "marry_command", "talk_command", "pickup_command", "vote_command", "items_command", "open_command", "command"]
+__all__ = ["time_command", "bf_command", "gf_command", "xf_command", "view_command", "flirt_command", "marry_command", "talk_command", "pickup_command", "vote_command", "items_command", "open_command", "prefix_command", "command"]
