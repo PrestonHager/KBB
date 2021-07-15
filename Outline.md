@@ -102,6 +102,7 @@ The following is a list of commands with a short description of what it does.
 If the command is highlighted in green it is complete and fully implemented.
 Orange commands are being worked on, but not completed.
 Red is for commands that have not been started but are planned.
+By default the prefix for all commands is `;`.
 
  + <fin>help</fin> - shows a short help message with each available command.
  + <fin>bf</fin> - draws a k-pop boyfriend to give the user if it has been at least 24 hours since the last given relationship.
@@ -112,10 +113,10 @@ Red is for commands that have not been started but are planned.
  + <fin>talk</fin> - your relationship will tell you a pickup line.
  + <fin>time</fin> - displays how much time is left until you can flirt and claim a new relationship.
  + <fin>pickup [line]</fin> - try to gain hearts based on a pickup line you write, the community votes on how it is.
- + <fin>items</fin> - display your current inventory.
+ + <inc>items</inc> - display your current inventory.
  + <fin>open</fin> - open a mystery box if you currently have one.
  + <fin>vote</fin> - vote for KBB and earn rewards!
- + <nst>prefix [prefix]</nst> - change the command prefix for KBB
+ + <fin>prefix [prefix]</fin> - change the command prefix for KBB
 
 <style>
 li>ol>li{

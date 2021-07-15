@@ -30,7 +30,6 @@ HELP_MESSAGE = """**;help** - shows this help message
 COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open", "prefix"]
 
 class KBB(discord.Client):
-    command_start = ';'
     saved = {"all": [], "available": []}
     available_queue = []
     talking_lines = {}
@@ -38,6 +37,8 @@ class KBB(discord.Client):
     development = False
     data_access_locks = {"save": threading.Lock(), "rel": threading.Lock(), "inv": threading.Lock()}
     database = DatabaseManager("kbb-users")
+    guilds = DatabaseManager("kbb-guilds")
+    cached_guilds = {}
 
     async def on_ready(self):
         print("Ready and logged on as {}!\nLoading files....".format(self.user))
@@ -70,7 +71,7 @@ class KBB(discord.Client):
             return False
         elif self.development == False and in_dev_channel:
             return False
-        if message.content.startswith(self.command_start):
+        if message.content.startswith(self.command_start(message.guild.id)):
             try:
                 await self._command(message)
             except:
@@ -85,7 +86,7 @@ class KBB(discord.Client):
                 del self.tasks[message_id]
 
     async def _command(self, message):
-        command = message.content[len(self.command_start):].strip().lower().split()
+        command = message.content[len(self.command_start(message.guild.id)):].strip().lower().split()
         first_word = command[0]
         print(f"Received command `{' '.join(command)}` from {message.author.name}")
         if first_word in COMMANDS:
@@ -202,6 +203,16 @@ class KBB(discord.Client):
         self.database.put_user(int(user.id), inventory=user_inventory)
         self.data_access_locks["inv"].release()
         return item
+
+    def command_start(self, guild_id):
+        if guild_id in self.cached_guilds:
+            return self.cached_guilds[guild_id]["prefix"]
+        else:
+            guild = self.guilds.get_guild(guild_id)
+            if guild == None:
+                guild = self.guilds.new_guild(guild_id)
+            self.cached_guilds[guild_id] = guild
+            return guild["prefix"]
 
     def _localize(self, item, loc_type="name"):
         if loc_type == "name":

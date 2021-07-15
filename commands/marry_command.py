@@ -10,7 +10,7 @@ import bot_utils as bot
 from tasks import marry_task
 
 def marry_command(self, message):
-    command = message.content[len(self.command_start):].strip().lower().split()
+    command = ''.join(message.content[len(self.command_start(message.guild.id)):]).strip().lower().split()
     user = self.database.get_user(int(message.author.id))
     if user != None and user['relationships']['current'] != {}:
         user_relationships = user['relationships']
