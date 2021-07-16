@@ -5,7 +5,7 @@ import bot_utils as bot
 from tasks import pickup_task
 
 def pickup_command(self, message):
-    command = message.content[len(self.command_start):].strip().lower().split()
+    command = message.content[len(self.command_start(message.guild.id)):].strip().lower().split()
     pickup_line = ' '.join(command[1:])
     user = self.database.get_user(int(message.author.id))
     if user != None and user['relationships']['current'] != {}:

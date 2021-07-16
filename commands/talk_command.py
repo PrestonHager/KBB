@@ -6,7 +6,7 @@ import random
 import bot_utils as bot
 
 def talk_command(self, message):
-    command = message.content[len(self.command_start):].strip().lower().split()
+    command = message.content[len(self.command_start(message.guild.id)):].strip().lower().split()
     user = self.database.get_user(int(message.author.id))
     if user != None and user['relationships']['current'] != {}:
         person = user['relationships']['current']

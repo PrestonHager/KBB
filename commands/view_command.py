@@ -4,7 +4,7 @@
 import bot_utils as bot
 
 def view_command(self, message):
-    command = message.content[len(self.command_start):].strip().lower().split()
+    command = message.content[len(self.command_start(message.guild.id)):].strip().lower().split()
     if len(command) > 1:
         if len(message.mentions) < 1:
             return bot.Message("View Relationship", message.author, "You must supply either a mention or nothing (for yourself)")
