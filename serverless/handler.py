@@ -28,7 +28,7 @@ def test(event, context):
         return create_response(response, 200)
     # get the user id, find them in the table, and add a box.
     amount = 2 if data["isWeekend"] else 1
-    user_id = data["user"]
+    user_id = int(data["user"])
     query = users_table.get_item(Key={'user_id': user_id})
     item_uuid = uuid4().hex
     box_item = {"uuid": item_uuid, "name": "Mystery Box", "description": "Open to reveal whatever might be inside!", "amount": amount, "item": "mystery_box"}

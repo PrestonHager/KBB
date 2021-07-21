@@ -125,7 +125,6 @@ functions:
 
 plugins:
   - serverless-domain-manager
-
 custom:
   customDomain:
     domainName: kbb.prestonhager.xyz
