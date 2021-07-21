@@ -13,6 +13,8 @@ def items_command(self, message):
             item_name = f"{number}) {item['name']}" if item['amount'] == 1 else f"{number}) {item['name']} × {item['amount']}"
             item_fields.add_field((item_name, f"  - {item['description']}"))
             number += 1
+        if len(item_fields.lines) == 0:
+            return bot.Message("Inventory", message.author, "You have no items in your inventory yet. Vote for KBB and get Mystery Boxes!\nUse the `;open` command to open them.")
         return bot.Message("Inventory", message.author, "", fields=item_fields)
     self.database.new_user(int(message.author.id))
     return bot.Message("Inventory", message.author, f"You have nothing in your inventory!")
