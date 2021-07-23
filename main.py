@@ -136,7 +136,10 @@ class KBB(discord.Client):
             if person != {}:
                 user_relationships[person['name']]['married'] = False
                 self.available_queue.append(person)
-        person = random.choice(pool)
+        try:
+            person = random.choice(pool)
+        except:
+            person = random.choice(self.saved['all'])
         user_relationships['current'] = person
         user_relationships['current']['date_picked'] = datetime.datetime.now().isoformat()
         if person['name'] in user_relationships:
