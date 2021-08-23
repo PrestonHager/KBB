@@ -4,7 +4,7 @@
 import boto3
 from uuid import uuid4
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name="us-west-2")
 
 class DatabaseManager:
     DEFAULT_PEOPLE = []

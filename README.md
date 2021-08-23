@@ -33,6 +33,8 @@ Create a `BOT_KEY.txt` file and put your bot key in there.
 Set the environment variables for an AWS private and public key to run the DynamoDB table.
 This table may need to be set up before it can be used.
 Install `discord.py` with `python -m pip install discord.py`.
+If you are going to use AWS DynamoDB then install `boto3` with `python -m pip install boto3`.
+You will also need to make an AWS access key for this and set it in the environment variables.
 Then, run the `main.py` file with `python main.py`
 
 ## Notes
