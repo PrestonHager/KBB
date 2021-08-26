@@ -9,7 +9,7 @@ def xf_command(self, message):
     # Get the user and the available people in the user's guild.
     user = self.database.get_user(int(message.author.id))
     people = self.guilds.get_guild(int(message.guild.id))["people"]
-    if len(self.saved['available']) == 0:
+    if len(people) == 0:
         return bot.Message("Relationship", message.author, "I'm out of people!")
     elif user != None and user['relationships']['current'] != {}:
         date_picked = datetime.datetime.fromisoformat(user['relationships']['current']['date_picked'])
