@@ -22,7 +22,7 @@ def open_command(self, message):
                 item = self._add_item(message.author, item_name)
                 article = "an" if item['name'][0] in "aeiouy" else "a"
                 return bot.Message("Open Box", message.author, f"You got {article} {item['name']} out of the box!")
-        return bot.Message("Open Box", message.author, "You don't have a Mystery Box in your inventory!")
+        return bot.Message("Open Box", message.author, "You don't have a Mystery Box in your inventory! Vote for KBB via the `vote` command and recieve some!")
     self.database.new_user(int(message.author.id))
     return bot.Message("Open Box", message.author, "You don't have a Mystery Box in your inventory!")
 

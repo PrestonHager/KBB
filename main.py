@@ -255,4 +255,5 @@ if __name__ == "__main__":
             client.development = True
     with open("BOT_KEY.txt", 'r') as f_in:
         bot_key = f_in.read().strip()
+    print("Connecting to discord...")
     client.run(bot_key)
