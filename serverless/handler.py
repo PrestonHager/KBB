@@ -59,6 +59,14 @@ def test(event, context):
         })
     return create_response(response, 200)
 
+def status(event, context):
+    response = {
+        "message": "Success!"
+    }
+    if event["queryStringParameters"] != None and "ping" in event["queryStringParameters"]:
+        response["pong"] = event["queryStringParameters"]["ping"]
+    return create_response(response, 200)
+
 def create_response(body, code=200):
     return {
         "statusCode": code,
