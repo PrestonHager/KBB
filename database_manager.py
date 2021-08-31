@@ -4,7 +4,11 @@
 import boto3
 from uuid import uuid4
 
-dynamodb = boto3.resource('dynamodb', region_name="us-west-2")
+with open("AWS_KEYS.txt") as f_in:
+    content = f_in.read()
+AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY = content.split(',')
+
+dynamodb = boto3.resource('dynamodb', region_name="us-west-2", aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
 class DatabaseManager:
     DEFAULT_PEOPLE = []

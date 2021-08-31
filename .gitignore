@@ -4,6 +4,7 @@ __pycache__/*
 
 # bot specific files
 BOT_KEY.txt
+AWS_KEYS.txt
 relationships.json
 save.json
 inventories.json
