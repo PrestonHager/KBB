@@ -26,8 +26,9 @@ HELP_MESSAGE = """**;help** - shows this help message
 **;pickup [line]** - try to gain hearts based on a pickup line you write
 **;items** - view the items in your inventory
 **;open** - open a mystery box if you have one
-**;vote** - vote for KBB and earn rewards!"""
-COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open", "prefix"]
+**;vote** - vote for KBB and earn rewards!
+**;support** - support KBB and find technical support"""
+COMMANDS = ["time", "bf", "gf", "xf", "view", "flirt", "marry", "talk", "pickup", "vote", "items", "open", "prefix1", "support"]
 
 class KBB(discord.Client):
     """The main KBB class for the discord bot."""
