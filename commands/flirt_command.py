@@ -2,6 +2,7 @@
 # by Preston Hager
 
 import datetime
+import dateutil
 import random
 
 import bot_utils as bot
@@ -11,7 +12,7 @@ def flirt_command(self, message):
     if user != None and user['relationships']['current'] != {}:
         user_relationships = user['relationships']
         person = user_relationships['current']
-        last_flirt = datetime.datetime.fromisoformat(user_relationships[person['name']]['last_flirt'])
+        last_flirt = dateutil.parser.parse(user_relationships[person['name']]['last_flirt'])
         if (datetime.datetime.now() - last_flirt).total_seconds() < 60 * 2:
             return bot.Message("Flirt", message.author, "You must wait at least 2 minutes between flirts.")
         user_relationships[person['name']]['last_flirt'] = datetime.datetime.now().isoformat()

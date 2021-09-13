@@ -50,7 +50,7 @@ class Message:
             for condition in self.task.conditions:
                 await condition.send(self.sent_message)
             if self.task.expires > 0:
-                self.task_expire_thread = threading.Timer(float(self.task.expires), asyncio.run_coroutine_threadsafe, args=(self._expire_task(), asyncio.get_running_loop()))
+                self.task_expire_thread = threading.Timer(float(self.task.expires), asyncio.run_coroutine_threadsafe, args=(self._expire_task(), asyncio.get_event_loop()))
                 self.task_expire_thread.start()
 
     async def resend(self):
