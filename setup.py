@@ -11,7 +11,9 @@ def main():
         print("Cloning repository from github")
         os.system("git clone https://github.com/PrestonHager/KBB.git")
         print("Moving all files to main level")
-        os.system("mv KBB/ .")
+        os.system("mv -n KBB/ ./")
+        print("Please add the bot key and AWS keys and restart.")
+        quit()
     os.system("python3 main.py")
 
 if __name__ == '__main__':
