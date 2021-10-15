@@ -18,6 +18,6 @@ def gf_command(self, message):
         if (datetime.datetime.now() - date_picked).total_seconds() < 24 * 60 * 60:
             return bot.Message("Girlfriend", message.author, "You already have a relationship, you can't have another right now.")
     girlfriend = self.draw_relationship(message.author.id, message.guild.id, pool)
-    return bot.Message("Girlfriend", message.author, f"You have **{girlfriend['name']}**!\nEnjoy your time together!", image_path=f"./images/{girlfriend['image']}")
+    return bot.Message("Girlfriend", message.author, f"You have **{girlfriend['name']}**!\nEnjoy your time together!", image_path=f"https://media.githubusercontent.com/media/PrestonHager/KBB/main/images/{girlfriend['image']}")
 
 __all__ = ["gf_command"]

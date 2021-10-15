@@ -33,19 +33,10 @@ class Message:
             self.fields.create_fields(embed)
         return embed
 
-    def _create_image(self, embed):
-        if self.image_path != None:
-            filename = self.image_path.split('/')[-1]
-            file = discord.File(self.image_path, filename=filename)
-            embed.set_image(url=f"attachment://{filename}")
-        else:
-            file = None
-        return file
-
     async def send(self, channel):
         self.embed = self._create_embed()
-        self.file = self._create_image(self.embed)
-        self.sent_message = await channel.send(embed=self.embed, file=self.file)
+        self.embed.set_image(url=self.image_path)
+        self.sent_message = await channel.send(embed=self.embed)
         if self.task != None:
             for condition in self.task.conditions:
                 await condition.send(self.sent_message)
