@@ -17,6 +17,6 @@ def xf_command(self, message):
         if (datetime.datetime.now() - date_picked).total_seconds() < 24 * 60 * 60:
             return bot.Message("Relationship", message.author, "You already have a relationship, you can't have another right now.")
     xfriend = self.draw_relationship(message.author.id, message.guild.id, people)
-    return bot.Message("Relationship", message.author, f"You have **{xfriend['name']}**!\nEnjoy your time together!", image_path=f"images/{xfriend['image']}")
+    return bot.Message("Relationship", message.author, f"You have **{xfriend['name']}**!\nEnjoy your time together!", image_path=f"./images/{xfriend['image']}")
 
 __all__ = ["xf_command"]

@@ -18,6 +18,6 @@ def bf_command(self, message):
         if (datetime.datetime.now() - date_picked).total_seconds() < 24 * 60 * 60:
             return bot.Message("Boyfriend", message.author, "You already have a relationship, you can't have another right now.")
     boyfriend = self.draw_relationship(message.author.id, message.guild.id, pool)
-    return bot.Message("Boyfriend", message.author, f"You have **{boyfriend['name']}**!\nEnjoy your time together!", image_path=f"images/{boyfriend['image']}")
+    return bot.Message("Boyfriend", message.author, f"You have **{boyfriend['name']}**!\nEnjoy your time together!", image_path=f"./images/{boyfriend['image']}")
 
 __all__ = ["bf_command"]
