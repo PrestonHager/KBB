@@ -35,7 +35,8 @@ class Message:
 
     async def send(self, channel):
         self.embed = self._create_embed()
-        self.embed.set_image(url=self.image_path)
+        if self.image_path != None:
+            self.embed.set_image(url=self.image_path)
         self.sent_message = await channel.send(embed=self.embed)
         if self.task != None:
             for condition in self.task.conditions:
